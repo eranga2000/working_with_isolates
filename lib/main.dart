@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,16 +22,29 @@ class MainApp extends StatelessWidget {
               children: [
                 Image.asset('assets/loading.gif'),
                 //UI blocking task
-                ElevatedButton(onPressed: () {
-                  // Simulate a complex task
-                 var total= complexTask1();
-                 debugPrint("Total: $total");
-                }, child: Text("Task 1")),
+                ElevatedButton(
+                  onPressed: () {
+                    // Simulate a complex task
+                    var total = complexTask1();
+                    debugPrint("Total: $total");
+                  },
+                  child: Text("Task 1"),
+                ),
 
-//Let's use isolates
-
-                ElevatedButton(onPressed: () {}, child: Text("Task 2")),
-                ElevatedButton(onPressed: () {}, child: Text("Task 3")),
+                //Let's use isolates
+                ElevatedButton(
+                  onPressed: ()async {
+                    // Simulate a complex task
+                    final receivePort = ReceivePort();
+                    await Isolate.spawn(complexTask2, receivePort.sendPort);
+                    receivePort.listen((message) {
+                      debugPrint("Total: $message");
+                      receivePort.close();
+                    });
+                  },
+                  child: Text("Task 2"),
+                ),
+                // ElevatedButton(onPressed: () {}, child: Text("Task 3")),
               ],
             ),
           ),
@@ -40,9 +55,20 @@ class MainApp extends StatelessWidget {
 
   double complexTask1() {
     var total = 0.0;
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < 30000000; i++) {
       total += i;
     }
     return total;
   }
+}
+
+//declare the method out side of every classes
+
+complexTask2(SendPort sendPort) {
+
+  var total = 0.0;
+  for (int i = 0; i <30000000000000000; i++) {
+    total += i;
+  }
+  sendPort.send(total);
 }
