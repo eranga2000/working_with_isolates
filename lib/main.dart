@@ -67,7 +67,7 @@ class MainApp extends StatelessWidget {
 complexTask2(SendPort sendPort) {
 
   var total = 0.0;
-  for (int i = 0; i <30000000000000000; i++) {
+  for (int i = 0; i <300000000; i++) {
     total += i;
   }
   sendPort.send(total);
